@@ -47,18 +47,18 @@ if __name__ == "__main__":
 # 2. 환율(고정값)
 # 3. 환전기능   : 사용자(외부)로부터   입력받는다
 
-RATE = 1325.0
+# RATE = 1325.0
 
-def check_mony(money):
-    try:
-        money = int(input("환전할 금액을 입력하세요: "))        
-        if money < 0:
-            raise ValueError("금액은 0 이상이어야 합니다.")
-        return money
-    except Exception as e:
-        print(f"입력 오류: {e}")
-        return check_mony(money)
+# def check_mony(money):
+#     try:
+#         money = int(input("환전할 금액을 입력하세요: "))        
+#         if money < 0:
+#             raise ValueError("금액은 0 이상이어야 합니다.")
+#         return money
+#     except Exception as e:
+#         print(f"입력 오류: {e}")
+#         return check_mony(money)
         
 
-converted_money = check_mony() * RATE
-print(f"환전된 금액은 {converted_money} 원입니다.")
+# converted_money = check_mony() * RATE
+# print(f"환전된 금액은 {converted_money} 원입니다.")
