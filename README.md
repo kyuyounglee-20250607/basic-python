@@ -7,8 +7,6 @@
 5. conda init  실행
 6. Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned   실행
 7. vscode  의 터미널 열면
-
-
 8. base 로 지작하는지 확인하기
 
 9. 가상환경 만들기
@@ -18,6 +16,7 @@
 10. conada activate 가상환경이름(week)  실행  하거나 또는
   Ctrl+Shift+p  입력후
   Python:select interpreter 입력하면 생성한 week 가상환경이 보임->선택
+  vscode 닫고 재 시작
   터미널활성화 한다는 메세지가 나오고 끝나면 다시 터미널 열기--> (week)선택된 터미널이 보임
 
 11. 코파일럿을 vscode에서 사용하기
