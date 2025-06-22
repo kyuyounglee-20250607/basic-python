@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 MBTI 검사 결과</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .result-container {
+            padding: 40px 30px;
+        }
+
+        .mbti-result {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .mbti-type {
+            font-size: 4em;
+            font-weight: 900;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .mbti-description {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .score-breakdown {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .score-breakdown h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.4em;
+        }
+
+        .score-pairs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .score-pair {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .score-pair h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .score-bar {
+            background: #e9ecef;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.8s ease;
+        }
+
+        .score-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .score-values {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .celebration {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .celebration .emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .mbti-type {
+                font-size: 3em;
+            }
+            
+            .result-container {
+                padding: 20px 15px;
+            }
+            
+            .score-pairs {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                display: block;
+                margin: 10px auto;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 MBTI 검사 결과</h1>
+            <p>당신의 성격유형을 확인해보세요!</p>
+        </div>
+
+        <div class="result-container">
+            <div class="celebration">
+                <div class="emoji">🎊</div>
+            </div>
+
+            <div class="mbti-result">
+                <div class="mbti-type">{{ mbti }}</div>
+                <div class="mbti-description">{{ description }}</div>
+            </div>
+
+            <div class="score-breakdown">
+                <h3>📊 상세 점수 분석</h3>
+                <div class="score-pairs">
+                    <div class="score-pair">
+                        <h4>외향성 vs 내향성</h4>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ (scores.E / (scores.E + scores.I)) * 100 }}%"></div>
+                        </div>
+                        <div class="score-labels">
+                            <span>내향성 (I)</span>
+                            <span>외향성 (E)</span>
+                        </div>
+                        <div class="score-values">
+                            <span>{{ scores.I }}</span>
+                            <span>{{ scores.E }}</span>
+                        </div>
+                    </div>
+
+                    <div class="score-pair">
+                        <h4>감각 vs 직관</h4>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ (scores.S / (scores.S + scores.N)) * 100 }}%"></div>
+                        </div>
+                        <div class="score-labels">
+                            <span>직관 (N)</span>
+                            <span>감각 (S)</span>
+                        </div>
+                        <div class="score-values">
+                            <span>{{ scores.N }}</span>
+                            <span>{{ scores.S }}</span>
+                        </div>
+                    </div>
+
+                    <div class="score-pair">
+                        <h4>사고 vs 감정</h4>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ (scores.T / (scores.T + scores.F)) * 100 }}%"></div>
+                        </div>
+                        <div class="score-labels">
+                            <span>감정 (F)</span>
+                            <span>사고 (T)</span>
+                        </div>
+                        <div class="score-values">
+                            <span>{{ scores.F }}</span>
+                            <span>{{ scores.T }}</span>
+                        </div>
+                    </div>
+
+                    <div class="score-pair">
+                        <h4>판단 vs 인식</h4>
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ (scores.J / (scores.J + scores.P)) * 100 }}%"></div>
+                        </div>
+                        <div class="score-labels">
+                            <span>인식 (P)</span>
+                            <span>판단 (J)</span>
+                        </div>
+                        <div class="score-values">
+                            <span>{{ scores.P }}</span>
+                            <span>{{ scores.J }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/" class="btn btn-primary">🔄 다시 검사하기</a>
+                <button onclick="window.print()" class="btn btn-secondary">🖨️ 결과 인쇄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 애니메이션 효과
+        window.addEventListener('load', function() {
+            const scoreFills = document.querySelectorAll('.score-fill');
+            scoreFills.forEach(fill => {
+                const width = fill.style.width;
+                fill.style.width = '0%';
+                setTimeout(() => {
+                    fill.style.width = width;
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html> 
