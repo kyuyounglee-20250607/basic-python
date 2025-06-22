@@ -1,0 +1,8 @@
+{
+  "notification_time": "09:00",
+  "notification_timeout": 10,
+  "notification_title": "오늘의 명언 😊",
+  "api_url": "https://korean-advice-open-api.vercel.app/api/advice",
+  "max_retries": 3,
+  "retry_delay": 5
+}
