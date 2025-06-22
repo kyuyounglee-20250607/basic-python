@@ -4,6 +4,9 @@ import os
 
 app = Flask(__name__)
 
+# Jinja2 템플릿에 enumerate 함수 추가
+app.jinja_env.globals.update(enumerate=enumerate)
+
 def load_mbti_questions(filepath='mbti.csv'):
     """
     CSV 파일에서 MBTI 질문 데이터를 불러오는 함수
