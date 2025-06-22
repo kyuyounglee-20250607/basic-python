@@ -1,7 +1,8 @@
 from pykrx import stock
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
 import logging
+from difflib import SequenceMatcher
 
 # 상수 정의
 MARKET_CLOSE_HOUR = 15
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 # 종목 코드 캐시
 _stock_code_cache: Dict[str, str] = {}
+_stock_name_cache: Dict[str, str] = {}  # 종목 코드 -> 종목명 캐시
 
 def get_target_stock_date(today: datetime) -> datetime:
     """
@@ -44,9 +46,70 @@ def get_target_stock_date(today: datetime) -> datetime:
     else:
         raise ValueError("날짜 판단 오류")
 
+def calculate_similarity(str1: str, str2: str) -> float:
+    """
+    두 문자열의 유사도를 계산합니다.
+    
+    Args:
+        str1: 첫 번째 문자열
+        str2: 두 번째 문자열
+        
+    Returns:
+        유사도 점수 (0.0 ~ 1.0)
+    """
+    return SequenceMatcher(None, str1.lower(), str2.lower()).ratio()
+
+def find_similar_stocks(target_name: str, all_stocks: List[Tuple[str, str]], limit: int = 5) -> List[Tuple[str, str, float]]:
+    """
+    대상 종목명과 유사한 종목들을 찾습니다.
+    
+    Args:
+        target_name: 찾고자 하는 종목명
+        all_stocks: 모든 종목 리스트 (종목코드, 종목명)
+        limit: 반환할 유사 종목 개수
+        
+    Returns:
+        유사 종목 리스트 (종목코드, 종목명, 유사도)
+    """
+    similar_stocks = []
+    
+    for code, name in all_stocks:
+        similarity = calculate_similarity(target_name, name)
+        if similarity > 0.3:  # 30% 이상 유사한 경우만 포함
+            similar_stocks.append((code, name, similarity))
+    
+    # 유사도 순으로 정렬하고 상위 limit개 반환
+    similar_stocks.sort(key=lambda x: x[2], reverse=True)
+    return similar_stocks[:limit]
+
+def get_all_stock_names() -> List[Tuple[str, str]]:
+    """
+    모든 종목의 코드와 이름을 가져옵니다.
+    
+    Returns:
+        종목 리스트 (종목코드, 종목명)
+    """
+    try:
+        tickers = stock.get_market_ticker_list(market="ALL")
+        stock_list = []
+        
+        for ticker in tickers:
+            if ticker not in _stock_name_cache:
+                name = stock.get_market_ticker_name(ticker)
+                _stock_name_cache[ticker] = name
+            else:
+                name = _stock_name_cache[ticker]
+            stock_list.append((ticker, name))
+            
+        return stock_list
+    except Exception as e:
+        logger.error(f"전체 종목 목록 조회 중 오류 발생: {e}")
+        return []
+
 def get_stock_code_by_name(name: str) -> str:
     """
     종목명으로 종목 코드를 조회합니다. 캐시를 사용하여 성능을 개선합니다.
+    종목을 찾지 못한 경우 유사한 종목을 추천합니다.
     
     Args:
         name: 종목명
@@ -62,14 +125,36 @@ def get_stock_code_by_name(name: str) -> str:
         return _stock_code_cache[name]
     
     try:
-        tickers = stock.get_market_ticker_list(market="ALL")
-        for ticker in tickers:
-            ticker_name = stock.get_market_ticker_name(ticker)
+        # 전체 종목 목록 가져오기
+        all_stocks = get_all_stock_names()
+        
+        # 정확한 매칭 시도
+        for ticker, ticker_name in all_stocks:
             if ticker_name == name:
                 # 캐시에 저장
                 _stock_code_cache[name] = ticker
                 return ticker
+        
+        # 정확한 매칭이 없으면 유사한 종목 찾기
+        similar_stocks = find_similar_stocks(name, all_stocks)
+        
+        if similar_stocks:
+            print(f"\n종목명 '{name}'을 찾을 수 없습니다.")
+            print("유사한 종목들을 찾았습니다:")
+            print("-" * 50)
+            
+            for i, (code, stock_name, similarity) in enumerate(similar_stocks, 1):
+                print(f"{i}. {stock_name} (유사도: {similarity:.1%})")
+            
+            print("-" * 50)
+            print("위 종목 중 하나를 선택하여 다시 시도해주세요.")
+            
+            # 가장 유사한 종목의 코드를 반환 (사용자가 선택할 수 있도록)
+            best_match = similar_stocks[0]
+            print(f"\n가장 유사한 종목: {best_match[1]} (코드: {best_match[0]})")
+            
         raise ValueError(f"종목명 '{name}'을 찾을 수 없습니다.")
+        
     except Exception as e:
         logger.error(f"종목 코드 조회 중 오류 발생: {e}")
         raise
@@ -148,6 +233,7 @@ def get_korean_stock_info(stock_name: str) -> Optional[str]:
 def clear_stock_cache() -> None:
     """종목 코드 캐시를 초기화합니다."""
     _stock_code_cache.clear()
+    _stock_name_cache.clear()
     logger.info("종목 코드 캐시가 초기화되었습니다.")
 
 # 사용 예시
@@ -159,3 +245,8 @@ if __name__ == "__main__":
     if result:
         print("\n" + "="*50)
         get_korean_stock_info("삼성전자")
+    
+    # 존재하지 않는 종목 테스트 (유사 종목 추천 기능 확인)
+    print("\n" + "="*50)
+    print("존재하지 않는 종목 테스트:")
+    get_korean_stock_info("삼성")  # "삼성전자"와 유사한 종목들이 추천됨
