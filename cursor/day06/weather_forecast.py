@@ -15,7 +15,7 @@ def get_weather(city: str, country_code: str = "KR") -> Optional[Dict[str, Any]]
         날씨 정보 딕셔너리 또는 None (오류 시)
     """
     # API 키 (실제 사용 시 config.json에서 로드하거나 환경변수 사용)
-    API_KEY = "cb9a8cbc6c0ca6f050057f8b496292fb"
+    API_KEY = "발급받은 키"
     
     try:
         # API 요청
