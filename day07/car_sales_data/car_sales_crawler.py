@@ -13,123 +13,154 @@ import time
 def crawl_car_sales_data(year, month):
     """
     네이버 검색 결과에서 자동차 판매량 데이터를 수집하는 함수 (연도, 월 지정)
+    모든 페이지의 데이터를 수집합니다.
     """
     print(f"🚗 {year}년 {month}월 자동차 판매량 데이터 수집을 시작합니다...")
     
-    # 네이버 검색 URL 동적 생성
-    url = f"https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query={year}%EB%85%84%20{month}%EC%9B%94%20%EC%9E%90%EB%8F%99%EC%B0%A8%20%ED%8C%90%EB%A7%A4%EB%9F%89"
+    all_car_data = []
+    page = 1
+    total_pages = 1
     
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-    
-    try:
-        print(f"📡 URL에 접속 중: {url}")
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        print("✅ 페이지 로드 성공")
-    except requests.RequestException as e:
-        print(f"❌ 페이지 로드 실패: {e}")
-        return []
-    
-    soup = BeautifulSoup(response.content, 'html.parser')
-    car_data = []
-    
-    # 방법 1: info_box 클래스를 가진 div 찾기 (제공해주신 HTML 구조)
-    info_boxes = soup.find_all('div', class_='info_box')
-    print(f"🔍 info_box div 찾음: {len(info_boxes)}개")
-    
-    for box in info_boxes:
+    while True:
+        print(f"\n📄 페이지 {page} 수집 중...")
+        
+        # 네이버 검색 URL 동적 생성 (페이지 파라미터 추가)
+        if page == 1:
+            url = f"https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query={year}%EB%85%84%20{month}%EC%9B%94%20%EC%9E%90%EB%8F%99%EC%B0%A8%20%ED%8C%90%EB%A7%A4%EB%9F%89"
+        else:
+            url = f"https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query={year}%EB%85%84%20{month}%EC%9B%94%20%EC%9E%90%EB%8F%99%EC%B0%A8%20%ED%8C%90%EB%A7%A4%EB%9F%89&start={((page-1)*10)+1}"
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
         try:
-            # 순위 추출
-            rank_elem = box.find('span', class_='this_text')
-            if not rank_elem:
-                continue
-            rank = int(rank_elem.get_text(strip=True))
-            
-            # 자동차 이름 추출
-            title_elem = box.find('strong', class_='title')
-            if not title_elem:
-                continue
-            car_name = title_elem.get_text(strip=True)
-            
-            # 판매량 추출 (첫 번째 info_txt)
-            info_txts = box.find_all('span', class_='info_txt')
-            if len(info_txts) < 1:
-                continue
-            
-            sales_text = info_txts[0].get_text(strip=True)
-            sales_match = re.search(r'(\d{1,3}(?:,\d{3})*)', sales_text)
-            
-            if not sales_match:
-                continue
-            sales_count = int(sales_match.group(1).replace(',', ''))
-            
-            # 카테고리 추출 (두 번째 info_txt)
-            category = ""
-            if len(info_txts) >= 2:
-                category = info_txts[1].get_text(strip=True)
-            
-            car_data.append({
-                'car_name': car_name,
-                'sales_count': sales_count,
-                'rank': rank,
-                'category': category
-            })
-            
-            print(f"✅ {rank}위: {car_name} - {sales_count:,}대 ({category})")
-            
-        except Exception as e:
-            print(f"⚠️ 데이터 추출 중 오류: {e}")
-            continue
-    
-    # 방법 2: 다른 구조로도 시도 (백업 방법)
-    if not car_data:
-        print("🔍 다른 방법으로 데이터 검색 중...")
+            print(f"📡 URL에 접속 중: {url}")
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            print("✅ 페이지 로드 성공")
+        except requests.RequestException as e:
+            print(f"❌ 페이지 로드 실패: {e}")
+            break
         
-        # horizon_box_image 클래스를 가진 div 찾기
-        horizon_boxes = soup.find_all('div', class_='horizon_box_image')
-        print(f"🔍 horizon_box_image div 찾음: {len(horizon_boxes)}개")
+        soup = BeautifulSoup(response.content, 'html.parser')
+        page_car_data = []
         
-        for box in horizon_boxes:
+        # 첫 번째 페이지에서 전체 페이지 수 확인
+        if page == 1:
+            total_pages = get_total_pages(soup)
+            print(f"📊 전체 페이지 수: {total_pages}")
+        
+        # 방법 1: info_box 클래스를 가진 div 찾기
+        info_boxes = soup.find_all('div', class_='info_box')
+        print(f"🔍 info_box div 찾음: {len(info_boxes)}개")
+        
+        for box in info_boxes:
             try:
-                # info_area 클래스를 가진 div 찾기
-                info_areas = box.find_all('div', class_='info_area')
+                # 순위 추출
+                rank_elem = box.find('span', class_='this_text')
+                if not rank_elem:
+                    continue
+                rank = int(rank_elem.get_text(strip=True))
                 
-                for area in info_areas:
-                    # 자동차 이름 추출
-                    title_elem = area.find('strong', class_='title')
-                    if not title_elem:
-                        continue
-                    car_name = title_elem.get_text(strip=True)
-                    
-                    # 판매량과 카테고리 추출
-                    info_txts = area.find_all('span', class_='info_txt')
-                    
-                    if len(info_txts) >= 1:
-                        sales_text = info_txts[0].get_text(strip=True)
-                        sales_match = re.search(r'(\d{1,3}(?:,\d{3})*)', sales_text)
-                        
-                        if sales_match:
-                            sales_count = int(sales_match.group(1).replace(',', ''))
-                            category = info_txts[1].get_text(strip=True) if len(info_txts) >= 2 else ""
-                            
-                            car_data.append({
-                                'car_name': car_name,
-                                'sales_count': sales_count,
-                                'rank': len(car_data) + 1,
-                                'category': category
-                            })
-                            
-                            print(f"✅ 발견: {car_name} - {sales_count:,}대 ({category})")
+                # 자동차 이름 추출
+                title_elem = box.find('strong', class_='title')
+                if not title_elem:
+                    continue
+                car_name = title_elem.get_text(strip=True)
+                
+                # 판매량 추출 (첫 번째 info_txt)
+                info_txts = box.find_all('span', class_='info_txt')
+                if len(info_txts) < 1:
+                    continue
+                
+                sales_text = info_txts[0].get_text(strip=True)
+                sales_match = re.search(r'(\d{1,3}(?:,\d{3})*)', sales_text)
+                
+                if not sales_match:
+                    continue
+                sales_count = int(sales_match.group(1).replace(',', ''))
+                
+                # 카테고리 추출 (두 번째 info_txt)
+                category = ""
+                if len(info_txts) >= 2:
+                    category = info_txts[1].get_text(strip=True)
+                
+                page_car_data.append({
+                    'car_name': car_name,
+                    'sales_count': sales_count,
+                    'rank': rank,
+                    'category': category
+                })
+                
+                print(f"✅ {rank}위: {car_name} - {sales_count:,}대 ({category})")
                 
             except Exception as e:
                 print(f"⚠️ 데이터 추출 중 오류: {e}")
                 continue
+        
+        # 방법 2: 다른 구조로도 시도 (백업 방법)
+        if not page_car_data:
+            print("🔍 다른 방법으로 데이터 검색 중...")
+            
+            # horizon_box_image 클래스를 가진 div 찾기
+            horizon_boxes = soup.find_all('div', class_='horizon_box_image')
+            print(f"🔍 horizon_box_image div 찾음: {len(horizon_boxes)}개")
+            
+            for box in horizon_boxes:
+                try:
+                    # info_area 클래스를 가진 div 찾기
+                    info_areas = box.find_all('div', class_='info_area')
+                    
+                    for area in info_areas:
+                        # 자동차 이름 추출
+                        title_elem = area.find('strong', class_='title')
+                        if not title_elem:
+                            continue
+                        car_name = title_elem.get_text(strip=True)
+                        
+                        # 판매량과 카테고리 추출
+                        info_txts = area.find_all('span', class_='info_txt')
+                        
+                        if len(info_txts) >= 1:
+                            sales_text = info_txts[0].get_text(strip=True)
+                            sales_match = re.search(r'(\d{1,3}(?:,\d{3})*)', sales_text)
+                            
+                            if sales_match:
+                                sales_count = int(sales_match.group(1).replace(',', ''))
+                                category = info_txts[1].get_text(strip=True) if len(info_txts) >= 2 else ""
+                                
+                                page_car_data.append({
+                                    'car_name': car_name,
+                                    'sales_count': sales_count,
+                                    'rank': len(page_car_data) + 1,
+                                    'category': category
+                                })
+                                
+                                print(f"✅ 발견: {car_name} - {sales_count:,}대 ({category})")
+                    
+                except Exception as e:
+                    print(f"⚠️ 데이터 추출 중 오류: {e}")
+                    continue
+        
+        # 현재 페이지 데이터를 전체 데이터에 추가
+        all_car_data.extend(page_car_data)
+        print(f"📄 페이지 {page}에서 {len(page_car_data)}개 데이터 수집 완료")
+        
+        # 다음 페이지로 이동
+        page += 1
+        
+        # 전체 페이지 수에 도달하거나 데이터가 없으면 종료
+        if page > total_pages or not page_car_data:
+            print(f"🏁 페이지 수집 완료 (총 {page-1}페이지)")
+            break
+        
+        # 정적 크롤링이므로 최소한의 딜레이만 적용 (서버 부하 방지)
+        time.sleep(0.1)
     
     # 중복 제거 및 정렬
     unique_cars = {}
-    for car in car_data:
+    for car in all_car_data:
         key = car['car_name']
         if key not in unique_cars or car['sales_count'] > unique_cars[key]['sales_count']:
             unique_cars[key] = car
@@ -149,6 +180,37 @@ def crawl_car_sales_data(year, month):
         return []
     
     return car_data
+
+def get_total_pages(soup):
+    """
+    페이지네이션에서 전체 페이지 수를 추출하는 함수
+    """
+    try:
+        # 페이지네이션 영역 찾기
+        pgs_div = soup.find('div', class_='pgs')
+        if not pgs_div:
+            return 1
+        
+        # 전체 페이지 수 추출
+        total_span = pgs_div.find('span', class_='_total')
+        if total_span:
+            total_pages = int(total_span.get_text(strip=True))
+            return total_pages
+        
+        # 다른 방법으로 페이지 수 확인
+        npgs_span = pgs_div.find('span', class_='npgs')
+        if npgs_span:
+            # "1 / 13" 형태의 텍스트에서 추출
+            text = npgs_span.get_text(strip=True)
+            match = re.search(r'(\d+)\s*/\s*(\d+)', text)
+            if match:
+                return int(match.group(2))
+        
+        return 1
+        
+    except Exception as e:
+        print(f"⚠️ 페이지 수 추출 중 오류: {e}")
+        return 1
 
 def save_to_database(car_data, year, month):
     """
@@ -276,8 +338,8 @@ def collect_period_sales():
             
             # 네이버 서버 부하 방지를 위한 대기
             if month_count < total_months:
-                print("⏳ 다음 월 수집을 위해 2초 대기 중...")
-                time.sleep(2)
+                print("⏳ 다음 월 수집을 위해 0.5초 대기 중...")
+                time.sleep(0.5)
     
     print("\n" + "=" * 60)
     print(f"✅ {start_year}년 ~ {end_year}년 데이터 수집이 완료되었습니다!")
