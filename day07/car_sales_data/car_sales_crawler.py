@@ -1,23 +1,23 @@
 """
 자동차 판매량 데이터 수집 프로그램
-네이버 검색 결과에서 자동차 판매량 정보를 수집하여 데이터베이스에 저장합니다.
+사용자가 연도와 기간을 설정하면 해당 기간의 월별 판매량을 자동으로 수집하여 데이터베이스에 저장합니다.
 """
 
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
 import re
-from datetime import datetime
+from datetime import datetime, date
 import time
 
-def crawl_car_sales_data():
+def crawl_car_sales_data(year, month):
     """
-    네이버 검색 결과에서 자동차 판매량 데이터를 수집하는 함수
+    네이버 검색 결과에서 자동차 판매량 데이터를 수집하는 함수 (연도, 월 지정)
     """
-    print("🚗 자동차 판매량 데이터 수집을 시작합니다...")
+    print(f"🚗 {year}년 {month}월 자동차 판매량 데이터 수집을 시작합니다...")
     
-    # 네이버 검색 URL (2025년 5월 자동차 판매량)
-    url = "https://search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&ssc=tab.nx.all&query=2025%EB%85%84+5%EC%9B%94+%EC%9E%90%EB%8F%99%EC%B0%A8+%ED%8C%90%EB%A7%A4%EB%9F%89&oquery=&tqi=ja9mldpzL8VssvFwNZwssssssdG-326752&ackey=0ykavzm0"
+    # 네이버 검색 URL 동적 생성
+    url = f"https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query={year}%EB%85%84%20{month}%EC%9B%94%20%EC%9E%90%EB%8F%99%EC%B0%A8%20%ED%8C%90%EB%A7%A4%EB%9F%89"
     
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -27,16 +27,12 @@ def crawl_car_sales_data():
         print(f"📡 URL에 접속 중: {url}")
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
-        
         print("✅ 페이지 로드 성공")
-        
     except requests.RequestException as e:
         print(f"❌ 페이지 로드 실패: {e}")
         return []
     
-    # BeautifulSoup으로 HTML 파싱
     soup = BeautifulSoup(response.content, 'html.parser')
-    
     car_data = []
     
     # 방법 1: info_box 클래스를 가진 div 찾기 (제공해주신 HTML 구조)
@@ -154,9 +150,9 @@ def crawl_car_sales_data():
     
     return car_data
 
-def save_to_database(car_data):
+def save_to_database(car_data, year, month):
     """
-    수집된 데이터를 데이터베이스에 저장하는 함수
+    수집된 데이터를 데이터베이스에 저장하는 함수 (연도, 월 지정)
     """
     if not car_data:
         print("❌ 저장할 데이터가 없습니다.")
@@ -168,8 +164,6 @@ def save_to_database(car_data):
     cursor = conn.cursor()
     
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    current_year = 2025  # URL에서 확인된 연도
-    current_month = 5    # URL에서 확인된 월
     
     saved_count = 0
     
@@ -180,7 +174,7 @@ def save_to_database(car_data):
                 (car_name, sales_count, rank_position, category, year, month, collected_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (car['car_name'], car['sales_count'], car['rank'], 
-                  car['category'], current_year, current_month, current_time))
+                  car['category'], year, month, current_time))
             
             saved_count += 1
             print(f"✅ 저장됨: {car['car_name']} - {car['sales_count']:,}대 (순위: {car['rank']})")
@@ -193,6 +187,102 @@ def save_to_database(car_data):
     conn.close()
     
     print(f"\n🎉 총 {saved_count}개의 차량 데이터가 성공적으로 저장되었습니다!")
+
+def collect_period_sales():
+    """
+    사용자가 시작 연도와 끝 연도를 설정하면 해당 연도 범위의 모든 월별 판매량을 수집/저장
+    """
+    print("🚗 자동차 판매량 데이터 수집 프로그램")
+    print("=" * 50)
+    
+    # 시작 연도 입력
+    while True:
+        try:
+            start_year = int(input("시작 연도를 입력하세요 (예: 2022): ").strip())
+            if start_year < 2000 or start_year > 2030:
+                print("❌ 2000년~2030년 사이의 연도를 입력하세요.")
+                continue
+            break
+        except ValueError:
+            print("❌ 올바른 연도를 입력하세요.")
+    
+    # 끝 연도 입력
+    while True:
+        try:
+            end_year = int(input("끝 연도를 입력하세요 (예: 2025): ").strip())
+            if end_year < 2000 or end_year > 2030:
+                print("❌ 2000년~2030년 사이의 연도를 입력하세요.")
+                continue
+            if end_year < start_year:
+                print("❌ 끝 연도는 시작 연도보다 크거나 같아야 합니다.")
+                continue
+            break
+        except ValueError:
+            print("❌ 올바른 연도를 입력하세요.")
+    
+    # 현재 날짜 확인 (미래 데이터 방지)
+    now = date.today()
+    if end_year > now.year:
+        print(f"⚠️ {end_year}년은 아직 데이터가 없을 수 있습니다.")
+        continue_choice = input("계속 진행하시겠습니까? (y/n): ").strip().lower()
+        if continue_choice not in ['y', 'yes', '예']:
+            print("❌ 프로그램을 종료합니다.")
+            return
+    
+    # 수집할 총 월 수 계산
+    total_months = (end_year - start_year + 1) * 12
+    if end_year == now.year:
+        # 현재 연도인 경우 현재 월까지만 수집
+        total_months = (end_year - start_year) * 12 + now.month
+    
+    print(f"\n📅 {start_year}년 1월 ~ {end_year}년 12월 데이터 수집을 시작합니다...")
+    print(f"📊 총 {total_months}개월의 데이터를 수집합니다.")
+    print("=" * 60)
+    
+    total_collected = 0
+    month_count = 0
+    
+    # 지정된 연도 범위의 모든 월별 데이터 수집
+    for year in range(start_year, end_year + 1):
+        # 각 연도의 월 범위 결정
+        if year == start_year:
+            start_month = 1
+        else:
+            start_month = 1
+            
+        if year == end_year:
+            if year == now.year:
+                end_month = now.month  # 현재 연도인 경우 현재 월까지만
+            else:
+                end_month = 12
+        else:
+            end_month = 12
+        
+        print(f"\n🏁 {year}년 데이터 수집 시작 ({start_month}월 ~ {end_month}월)")
+        print("-" * 50)
+        
+        for month in range(start_month, end_month + 1):
+            month_count += 1
+            print(f"\n===== {year}년 {month}월 데이터 수집 시작 ({month_count}/{total_months}) =====")
+            
+            car_data = crawl_car_sales_data(year, month)
+            
+            if car_data:
+                save_to_database(car_data, year, month)
+                total_collected += len(car_data)
+                print(f"✅ {year}년 {month}월: {len(car_data)}개 차량 데이터 수집 완료")
+            else:
+                print(f"⚠️ {year}년 {month}월 데이터가 없습니다.")
+            
+            # 네이버 서버 부하 방지를 위한 대기
+            if month_count < total_months:
+                print("⏳ 다음 월 수집을 위해 2초 대기 중...")
+                time.sleep(2)
+    
+    print("\n" + "=" * 60)
+    print(f"✅ {start_year}년 ~ {end_year}년 데이터 수집이 완료되었습니다!")
+    print(f"📊 총 {month_count}개월, {total_collected}개의 차량 데이터가 수집되었습니다.")
+    print("=" * 60)
 
 def show_collected_data():
     """
@@ -226,43 +316,18 @@ def show_collected_data():
     
     conn.close()
 
-def main():
-    """
-    메인 함수
-    """
-    print("🚗 자동차 판매량 데이터 수집 프로그램")
-    print("=" * 50)
-    
-    while True:
-        print("\n📋 메뉴를 선택하세요:")
-        print("1. 데이터 수집 및 저장")
-        print("2. 수집된 데이터 조회")
-        print("3. 종료")
-        
-        choice = input("\n선택 (1-3): ").strip()
-        
-        if choice == '1':
-            print("\n🔄 데이터 수집을 시작합니다...")
-            car_data = crawl_car_sales_data()
-            
-            if car_data:
-                save_choice = input("\n💾 수집된 데이터를 데이터베이스에 저장하시겠습니까? (y/n): ").strip().lower()
-                if save_choice in ['y', 'yes', '예']:
-                    save_to_database(car_data)
-                else:
-                    print("❌ 데이터 저장을 취소했습니다.")
-            else:
-                print("❌ 저장할 데이터가 없습니다.")
-                
-        elif choice == '2':
-            show_collected_data()
-            
-        elif choice == '3':
-            print("\n👋 프로그램을 종료합니다.")
-            break
-            
-        else:
-            print("❌ 잘못된 선택입니다. 1-3 중에서 선택해주세요.")
-
+# 메인 실행
 if __name__ == "__main__":
-    main() 
+    collect_period_sales()
+    
+    # 수집 완료 후 데이터 조회 여부 확인
+    while True:
+        show_choice = input("\n📊 수집된 데이터를 조회하시겠습니까? (y/n): ").strip().lower()
+        if show_choice in ['y', 'yes', '예']:
+            show_collected_data()
+            break
+        elif show_choice in ['n', 'no', '아니오']:
+            print("👋 프로그램을 종료합니다.")
+            break
+        else:
+            print("❌ y 또는 n을 입력하세요.") 
