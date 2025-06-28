@@ -7,7 +7,14 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+# seaborn을 선택적으로 import
+try:
+    import seaborn as sns
+    SEABORN_AVAILABLE = True
+except ImportError:
+    SEABORN_AVAILABLE = False
+    print("⚠️ seaborn이 설치되지 않았습니다. 기본 matplotlib 스타일을 사용합니다.")
 
 class CarSalesAnalyzer:
     """
@@ -23,6 +30,11 @@ class CarSalesAnalyzer:
         # 한글 폰트 설정 (matplotlib)
         plt.rcParams['font.family'] = 'Malgun Gothic'
         plt.rcParams['axes.unicode_minus'] = False
+        
+        # seaborn이 있으면 스타일 설정
+        if SEABORN_AVAILABLE:
+            sns.set_style("whitegrid")
+            sns.set_palette("husl")
     
     def get_connection(self):
         """
