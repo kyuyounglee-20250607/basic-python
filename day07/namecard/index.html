@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 명함</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?display=swap&family=Manrope:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <style>body { font-family: Manrope, 'Noto Sans', sans-serif; }</style>
+</head>
+<body class="bg-[#f3f5f7]">
+    <div class="relative flex size-full min-h-screen flex-col bg-white justify-between group/design-root overflow-x-hidden max-w-md mx-auto shadow-lg">
+        <!-- 메인페이지 -->
+        <div id="tab-main" class="block">
+            <!-- ... (여기에 메인페이지 HTML 삽입) ... -->
+        </div>
+        <!-- 상세페이지 -->
+        <div id="tab-detail" class="hidden">
+            <!-- ... (여기에 상세페이지 HTML 삽입) ... -->
+        </div>
+        <!-- 공유페이지 -->
+        <div id="tab-share" class="hidden">
+            <!-- ... (여기에 공유페이지 HTML 삽입) ... -->
+        </div>
+        <!-- 하단 네비게이션 -->
+        <div class="flex gap-2 border-t border-[#f0f2f5] bg-white px-4 pb-3 pt-2">
+            <button class="flex-1 flex flex-col items-center gap-1 nav-btn" data-tab="main">
+                <!-- Home Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.53,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path></svg>
+            </button>
+            <button class="flex-1 flex flex-col items-center gap-1 nav-btn" data-tab="detail">
+                <!-- User Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path></svg>
+            </button>
+            <button class="flex-1 flex flex-col items-center gap-1 nav-btn" data-tab="share">
+                <!-- Share Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,109.66l-48,48a8,8,0,0,1-11.32-11.32L204.69,112H165a88,88,0,0,0-85.23,66,8,8,0,0,1-15.5-4A103.94,103.94,0,0,1,165,96h39.71L170.34,61.66a8,8,0,0,1,11.32-11.32l48,48A8,8,0,0,1,229.66,109.66ZM192,208H40V88a8,8,0,0,0-16,0V208a16,16,0,0,0,16,16H192a8,8,0,0,0,0-16Z"></path></svg>
+            </button>
+        </div>
+        <div class="h-5 bg-white"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
