@@ -39,4 +39,4 @@ date,sales
 2025-06-03,170
 ...
 
-streamlit run 002.py
+streamlit run app.py
