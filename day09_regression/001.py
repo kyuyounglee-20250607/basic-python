@@ -1,4 +1,4 @@
 import pandas as pd
-df = pd.read_csv('city_gas_month.csv')
+url = 'https://raw.githubusercontent.com/kyuyounglee-20250607/basic-python/refs/heads/main/day09_regression/clean_sales_data.csv'
+df = pd.read_csv(url)
 print(df)
-df.to_csv("clean_sales_data.csv", index=False, encoding='utf-8')
