@@ -26,7 +26,8 @@
 | joblib _(옵션)_ | 모델 저장/불러오기 가능 |
 
 > ⚠️ 모두 **무료 오픈소스** 라이브러리입니다.
-
+| numpy      | 수치 계산 지원 |
+pip install scikit-learn pandas matplotlib joblib
 ---
 
 ## 📁 입력 데이터 형식 (`sales_data.csv`)
