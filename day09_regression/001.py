@@ -1,7 +1,4 @@
-import pandas as pd
-url = 'https://raw.githubusercontent.com/kyuyounglee-20250607/basic-python/refs/heads/main/day09_regression/clean_sales_data.csv'
-df = pd.read_csv(url)
-print(df)
+
 
 import pandas as pd
 import numpy as np
@@ -11,23 +8,24 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import OneHotEncoder
 
+file_path = 'https://raw.githubusercontent.com/kyuyounglee-20250607/basic-python/refs/heads/main/day09_regression/clean_sales_data.csv'
 # 1. 데이터 로드
 def load_data(file_path):
-    df = pd.read_csv(file_path, parse_dates=["date"])
-    df = df.sort_values("date")
+    df = pd.read_csv(file_path, parse_dates=["일자"])
+    df = df.sort_values("일자")
     return df
 
 # 2. 특성 엔지니어링
 def create_features(df):
-    df["dayofweek"] = df["date"].dt.dayofweek  # 요일 (0=월 ~ 6=일)
-    df["month"] = df["date"].dt.month
-    df["day"] = df["date"].dt.day
+    df["dayofweek"] = df["일자"].dt.dayofweek  # 요일 (0=월 ~ 6=일)
+    df["month"] = df["일자"].dt.month
+    df["day"] = df["일자"].dt.day
     return df
 
 # 3. 데이터 준비
 def prepare_data(df):
     features = ["dayofweek", "month", "day"]
-    target = "sales"
+    target = "도시가스 총 판매량 전국 기온"
 
     X = df[features]
     y = df[target]
@@ -49,7 +47,7 @@ def create_future_dates(start_date, days=7):
 # 6. 전체 파이프라인
 def main():
     # CSV 파일 예시: columns=['date', 'sales']
-    file_path = "sales_data.csv"  # 사용자 파일
+    # file_path = "sales_data.csv"  # 사용자 파일
     df = load_data(file_path)
     df = create_features(df)
 
@@ -76,8 +74,8 @@ def main():
 
     # 그래프 출력 (옵션)
     plt.figure(figsize=(10, 5))
-    plt.plot(df["date"], df["sales"], label="과거 판매량")
-    plt.plot(future_df["date"], future_df["predicted_sales"], label="예측 판매량", linestyle='--', marker='o')
+    plt.plot(df["일자"], df["도시가스 총 판매량 전국 기온"], label="과거 판매량")
+    plt.plot(future_df["일자"], future_df["predicted_sales"], label="예측 판매량", linestyle='--', marker='o')
     plt.legend()
     plt.title("판매량 예측")
     plt.xlabel("날짜")
