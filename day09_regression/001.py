@@ -19,6 +19,7 @@ file_path = 'https://raw.githubusercontent.com/kyuyounglee-20250607/basic-python
 def load_data(file_path):
     df = pd.read_csv(file_path)
     df.columns = ['date','sales']
+    df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date")
     return df
 
