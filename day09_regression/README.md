@@ -27,7 +27,7 @@
 
 > ⚠️ 모두 **무료 오픈소스** 라이브러리입니다.
 | numpy      | 수치 계산 지원 |
-pip install scikit-learn pandas matplotlib joblib
+pip install scikit-learn pandas matplotlib joblib streamlit
 ---
 
 ## 📁 입력 데이터 형식 (`sales_data.csv`)
@@ -38,3 +38,5 @@ date,sales
 2025-06-02,150
 2025-06-03,170
 ...
+
+streamlit run 002.py
