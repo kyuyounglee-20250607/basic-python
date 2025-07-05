@@ -72,12 +72,12 @@ def main():
 
     # 미래 예측
     last_date = df["date"].max()
-    future_df = create_future_dates(last_date + pd.Timedelta(days=1), days=7)
+    future_df = create_future_dates(last_date + pd.Timedelta(days=1), days=365)
     future_preds = model.predict(future_df[["dayofweek", "month", "day"]])
 
     # 결과 출력
     future_df["predicted_sales"] = future_preds.astype(int)
-    print("\n📈 향후 7일간 예측 판매량:")
+    print("\n📈 향후 365일간 예측 판매량:")
     print(future_df[["date", "predicted_sales"]])
 
     # 그래프 출력 (옵션)
@@ -89,7 +89,12 @@ def main():
     plt.xlabel("날짜")
     plt.ylabel("판매량")
     plt.grid(True)
-    plt.show()
+    plt.tight_layout()
+
+    # 저장
+    plt.savefig("forecast.png", dpi=150)
+    plt.close()  # 그래프 메모리 닫기
+    print("✅ 그래프가 forecast.png 로 저장되었습니다.")
 
 if __name__ == "__main__":
     main()
