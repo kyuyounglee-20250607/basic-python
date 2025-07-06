@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 명함</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?display=swap&family=Manrope:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <style>body { font-family: Manrope, 'Noto Sans', sans-serif; background: #f3f5f7; }</style>
+</head>
+<body>
+    <div class="container py-4" style="max-width: 430px; min-height: 100vh; background: #fff; box-shadow: 0 0 24px #0001; border-radius: 18px;">
+        <!-- 메인페이지 -->
+        <div id="tab-main" class="block">
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                <h2 class="h5 fw-bold text-center flex-grow-1 mb-0">My Card</h2>
+                <button class="btn btn-link p-0 ms-2" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"></path></svg></button>
+            </div>
+            <div class="text-center py-4">
+                <div class="mx-auto rounded-circle mb-3" style="width: 128px; height: 128px; background: url('https://lh3.googleusercontent.com/aida-public/AB6AXuADkUQDc_vf3Nw8bcyeorFvZaWzBU5Kp9xziNNQsMN4M_FiKc_2fL0u0VEij4aS00sBwfDiuFmksDyRtSxY5eZsW4F1nEl9JREunMwC7TX35DqrA6F9ufRHu8MCwxpp91ybLQB7OVYXiz4ssTMi5knb6h9lm-ecRduKMOeXlevecl7ELmQMQALzj4McBwh14srxMY6sT_l1-bDdY-Q9XfhcAkxXUzfMG_IqK_uxAnm4xOQHl1RdlbR9D0tiDVO2Ym3l1Ir5cxhkfmk2') center/cover no-repeat;"></div>
+                <h3 class="fw-bold mb-1">Ethan Carter</h3>
+                <div class="text-secondary">Product Designer</div>
+                <div class="text-secondary mb-3">Acme Co.</div>
+            </div>
+            <h4 class="h6 fw-bold px-3">Contact</h4>
+            <div class="px-3">
+                <div class="border-top py-2 d-flex justify-content-between">
+                    <span class="text-secondary">Mobile</span>
+                    <span>+1-555-123-4567</span>
+                </div>
+                <div class="border-top py-2 d-flex justify-content-between">
+                    <span class="text-secondary">Email</span>
+                    <span>ethan.carter@acme.com</span>
+                </div>
+                <div class="border-top py-2 d-flex justify-content-between">
+                    <span class="text-secondary">Website</span>
+                    <span>acme.com</span>
+                </div>
+            </div>
+        </div>
+        <!-- 상세페이지 -->
+        <div id="tab-detail" class="d-none">
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                <button class="btn btn-link p-0" title="Back"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"></path></svg></button>
+                <button class="btn btn-link p-0 ms-2" title="Share"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,109.66l-48,48a8,8,0,0,1-11.32-11.32L204.69,112H165a88,88,0,0,0-85.23,66,8,8,0,0,1-15.5-4A103.94,103.94,0,0,1,165,96h39.71L170.34,61.66a8,8,0,0,1,11.32-11.32l48,48A8,8,0,0,1,229.66,109.66ZM192,208H40V88a8,8,0,0,0-16,0V208a16,16,0,0,0,16,16H192a8,8,0,0,0,0-16Z"></path></svg></button>
+            </div>
+            <div class="text-center py-4">
+                <div class="mx-auto rounded-circle mb-3" style="width: 128px; height: 128px; background: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAgxLT2Nd5cgmo08iC9s6Gmlb_l4slHLUxiNDU1uCsl05zKEUtFRNS_u8-ClcA8fqheSbGRPQDpl5oDxz7pC0PKR9pSgnB36NaMCs5COYw7TOoU_oSo8UVSL65dNUEW39FFWB1b9pXrQ8250hIJyZgCkphmSDw_BY44OdylZYu3rOSfGNLXxnBNpUZ03uvThPLKZ41FbMkJqk4VLeyLvhhwDT0kU7XEP6ooTjNIZDRbzGLS1cAsfHRQ-6Y66d3-pTUAbpBavDXjCJHe') center/cover no-repeat;"></div>
+                <h3 class="fw-bold mb-1">Ethan Carter</h3>
+                <div class="text-secondary">Product Designer</div>
+                <div class="text-secondary mb-3">San Francisco, CA</div>
+            </div>
+            <div class="px-3">
+                <h4 class="h6 fw-bold">About</h4>
+                <p class="mb-3">Ethan is a product designer with over 5 years of experience in the tech industry. He is passionate about creating user-centered designs that are both beautiful and functional.</p>
+                <h4 class="h6 fw-bold">Experience</h4>
+                <div class="mb-2"><strong>Tech Innovators Inc.</strong> <span class="text-secondary float-end">2020 - Present</span><br><span class="text-secondary">Product Designer</span></div>
+                <div class="mb-2"><strong>Creative Solutions Co.</strong> <span class="text-secondary float-end">2018 - 2020</span><br><span class="text-secondary">UX/UI Designer</span></div>
+                <h4 class="h6 fw-bold">Education</h4>
+                <div class="mb-2"><strong>University of California, Berkeley</strong> <span class="text-secondary float-end">2014 - 2018</span><br><span class="text-secondary">Bachelor of Science in Design</span></div>
+                <h4 class="h6 fw-bold">Links</h4>
+                <div class="mb-2 d-flex justify-content-between align-items-center"><span>Portfolio</span><span class="text-secondary">&rarr;</span></div>
+                <div class="mb-2 d-flex justify-content-between align-items-center"><span>LinkedIn</span><span class="text-secondary">&rarr;</span></div>
+                <div class="mb-2 d-flex justify-content-between align-items-center"><span>Twitter</span><span class="text-secondary">&rarr;</span></div>
+            </div>
+        </div>
+        <!-- 공유페이지 -->
+        <div id="tab-share" class="d-none">
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                <button class="btn btn-link p-0" title="Close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></button>
+                <h2 class="h5 fw-bold text-center flex-grow-1 mb-0">Share</h2>
+            </div>
+            <div class="text-center py-4">
+                <div class="mx-auto rounded-circle mb-3" style="width: 128px; height: 128px; background: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMK__ug6Tq_R3n8ZoG63YZMc_v_eh_2keNwgx6x9foEIpOFfTCoaigmPUiv0DRERhJn2vOUIpaJ27_uvsEfxI0jVsnxWnp5QO-FD20zbCz9L15V3UR4lgme9TZDY1EGpeDi3PyyqDZ5P3CIeIOpA0pXS8epNPyjMKiWbJH8WIOgLqQuPvTiuQZM2i9w3Akae2ErR--U1nu9B6WnjZPXtkfuefRT4KC7wV0-L2pgHBixGI_9l3f032VNm30N1P7RuWfCQzacTtOoj5N') center/cover no-repeat;"></div>
+                <h3 class="fw-bold mb-1">Ethan Carter</h3>
+                <div class="text-secondary mb-3">Product Designer</div>
+            </div>
+            <div class="px-3">
+                <h4 class="h6 fw-bold">Share via</h4>
+                <div class="list-group mb-2">
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">QR Code <span class="text-secondary">&rarr;</span></a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">Link <span class="text-secondary">&rarr;</span></a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">Social Media <span class="text-secondary">&rarr;</span></a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">Email <span class="text-secondary">&rarr;</span></a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">Text Message <span class="text-secondary">&rarr;</span></a>
+                </div>
+            </div>
+        </div>
+        <!-- 하단 네비게이션 -->
+        <nav class="navbar fixed-bottom navbar-light bg-light border-top d-flex justify-content-around" style="max-width: 430px; margin: 0 auto; border-radius: 0 0 18px 18px;">
+            <button class="btn nav-btn" data-tab="main" title="Main"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.53,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path></svg></button>
+            <button class="btn nav-btn" data-tab="detail" title="Detail"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path></svg></button>
+            <button class="btn nav-btn" data-tab="share" title="Share"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,109.66l-48,48a8,8,0,0,1-11.32-11.32L204.69,112H165a88,88,0,0,0-85.23,66,8,8,0,0,1-15.5-4A103.94,103.94,0,0,1,165,96h39.71L170.34,61.66a8,8,0,0,1,11.32-11.32l48,48A8,8,0,0,1,229.66,109.66ZM192,208H40V88a8,8,0,0,0-16,0V208a16,16,0,0,0,16,16H192a8,8,0,0,0,0-16Z"></path></svg></button>
+        </nav>
+    </div>
+    <script src="script.js"></script>
+    <!-- Bootstrap JS (Optional, for some components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

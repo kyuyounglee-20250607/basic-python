@@ -1,0 +1,62 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+.business-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 400px;
+    margin: 0 auto;
+    transition: transform 0.3s ease;
+}
+
+.business-card:hover {
+    transform: translateY(-10px);
+}
+
+.card-content {
+    padding: 30px;
+    text-align: center;
+}
+
+.card-content h1 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.card-content p {
+    color: #666;
+    line-height: 1.6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .business-card {
+        max-width: 100%;
+        margin: 10px;
+    }
+    
+    .card-content {
+        padding: 20px;
+    }
+} 

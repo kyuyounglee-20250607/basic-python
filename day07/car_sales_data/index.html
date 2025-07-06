@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 자동차 판매량 데이터 시각화</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #ecf0f1;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .chart-container {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .data-table {
+            padding: 20px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .rank-1 { background: linear-gradient(45deg, #ffd700, #ffed4e); }
+        .rank-2 { background: linear-gradient(45deg, #c0c0c0, #e8e8e8); }
+        .rank-3 { background: linear-gradient(45deg, #cd7f32, #daa520); }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #e74c3c;
+            font-size: 1.2em;
+        }
+
+        .file-input-container {
+            padding: 20px;
+            background: #ecf0f1;
+            text-align: center;
+        }
+
+        .file-input-container input[type="file"] {
+            display: none;
+        }
+
+        .file-input-container label {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+
+        .file-input-container label:hover {
+            background: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 자동차 판매량 데이터 시각화</h1>
+            <p>네이버 검색 결과에서 수집한 자동차 판매량 데이터 분석</p>
+        </div>
+
+        <div class="file-input-container">
+            <label for="jsonFile">
+                📁 JSON 파일 선택 (car_sales_data.json)
+            </label>
+            <input type="file" id="jsonFile" accept=".json">
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-number" id="totalRecords">-</div>
+                <div class="stat-label">총 데이터 수</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalYears">-</div>
+                <div class="stat-label">수집 연도</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalBrands">-</div>
+                <div class="stat-label">브랜드 수</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalSales">-</div>
+                <div class="stat-label">총 판매량</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>연도:</label>
+                <select id="yearFilter">
+                    <option value="">전체</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>브랜드:</label>
+                <select id="brandFilter">
+                    <option value="">전체</option>
+                </select>
+            </div>
+            <div class="control-group" id="searchContainer">
+                <label>검색:</label>
+                <input type="text" id="searchInput" placeholder="차량명 검색...">
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-card">
+                <div class="chart-title">연도별 총 판매량</div>
+                <canvas id="yearlyChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">브랜드별 판매량</div>
+                <canvas id="brandChart"></canvas>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>차량명</th>
+                            <th>판매량</th>
+                            <th>카테고리</th>
+                            <th>연도</th>
+                            <th>월</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="6" class="loading">JSON 파일을 선택해주세요.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let carData = null;
+        let filteredData = null;
+        let yearlyChart = null;
+        let brandChart = null;
+
+        // 파일 선택 이벤트
+        document.getElementById('jsonFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        carData = JSON.parse(e.target.result);
+                        filteredData = carData.data;
+                        
+                        updateStats();
+                        updateFilters();
+                        updateCharts();
+                        updateTable();
+                    } catch (error) {
+                        document.getElementById('tableBody').innerHTML = 
+                            `<tr><td colspan="6" class="error">JSON 파일을 읽을 수 없습니다: ${error.message}</td></tr>`;
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // 통계 업데이트
+        function updateStats() {
+            if (!carData) return;
+            
+            // 필터된 데이터 기준으로 통계 계산
+            const filteredTotalRecords = filteredData.length;
+            const filteredYears = [...new Set(filteredData.map(item => item.year))].length;
+            const filteredBrands = [...new Set(filteredData.map(item => getBrandFromCarName(item.car_name)))].length;
+            const filteredTotalSales = filteredData.reduce((sum, item) => sum + item.sales_count, 0);
+            
+            document.getElementById('totalRecords').textContent = filteredTotalRecords.toLocaleString();
+            document.getElementById('totalYears').textContent = filteredYears;
+            document.getElementById('totalBrands').textContent = filteredBrands;
+            document.getElementById('totalSales').textContent = filteredTotalSales.toLocaleString();
+        }
+
+        // 필터 업데이트
+        function updateFilters() {
+            const yearFilter = document.getElementById('yearFilter');
+            const brandFilter = document.getElementById('brandFilter');
+            
+            // 연도 필터
+            const years = [...new Set(carData.data.map(item => item.year))].sort((a, b) => b - a);
+            yearFilter.innerHTML = '<option value="">전체</option>';
+            years.forEach(year => {
+                yearFilter.innerHTML += `<option value="${year}">${year}년</option>`;
+            });
+            
+            // 브랜드 필터
+            const brands = Object.keys(carData.brand_stats).sort();
+            brandFilter.innerHTML = '<option value="">전체</option>';
+            brands.forEach(brand => {
+                brandFilter.innerHTML += `<option value="${brand}">${brand}</option>`;
+            });
+        }
+
+        // 검색 컨테이너 업데이트
+        function updateSearchContainer() {
+            const yearFilter = document.getElementById('yearFilter').value;
+            const brandFilter = document.getElementById('brandFilter').value;
+            const searchContainer = document.getElementById('searchContainer');
+            
+            // 연도와 브랜드가 모두 선택된 경우 모델 선택 드롭다운으로 변경
+            if (yearFilter && brandFilter) {
+                // 해당 연도와 브랜드의 모델 목록 생성
+                const models = [...new Set(
+                    carData.data
+                        .filter(item => item.year == yearFilter && getBrandFromCarName(item.car_name) === brandFilter)
+                        .map(item => item.car_name)
+                )].sort();
+                
+                searchContainer.innerHTML = `
+                    <label>모델:</label>
+                    <select id="modelFilter">
+                        <option value="">전체 모델</option>
+                        ${models.map(model => `<option value="${model}">${model}</option>`).join('')}
+                    </select>
+                `;
+                
+                // 모델 필터 이벤트 리스너 추가
+                document.getElementById('modelFilter').addEventListener('change', filterData);
+            } else {
+                // 기본 검색 입력으로 복원
+                searchContainer.innerHTML = `
+                    <label>검색:</label>
+                    <input type="text" id="searchInput" placeholder="차량명 검색...">
+                `;
+                
+                // 검색 입력 이벤트 리스너 추가
+                document.getElementById('searchInput').addEventListener('input', filterData);
+            }
+        }
+
+        // 차트 업데이트
+        function updateCharts() {
+            updateYearlyChart();
+            updateBrandChart();
+        }
+
+        // 연도별 차트 - 필터된 데이터 기준으로 업데이트
+        function updateYearlyChart() {
+            const ctx = document.getElementById('yearlyChart').getContext('2d');
+            
+            if (yearlyChart) {
+                yearlyChart.destroy();
+            }
+            
+            const yearFilter = document.getElementById('yearFilter').value;
+            const brandFilter = document.getElementById('brandFilter').value;
+            
+            // 차트 데이터 계산
+            let chartData = [];
+            let chartType = 'line';
+            let chartTitle = '';
+            
+            if (yearFilter && brandFilter) {
+                // 특정 연도 + 특정 브랜드: 해당 브랜드의 모델별 판매량
+                const modelStats = {};
+                carData.data.forEach(item => {
+                    if (item.year == yearFilter && getBrandFromCarName(item.car_name) === brandFilter) {
+                        const model = item.car_name;
+                        if (!modelStats[model]) {
+                            modelStats[model] = 0;
+                        }
+                        modelStats[model] += item.sales_count;
+                    }
+                });
+                
+                chartData = Object.entries(modelStats)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 15) // 상위 15개 모델만
+                    .map(([model, totalSales]) => ({
+                        label: model,
+                        value: totalSales
+                    }));
+                
+                chartType = 'bar';
+                chartTitle = `${yearFilter}년 ${brandFilter} 모델별 판매량`;
+            } else if (yearFilter && !brandFilter) {
+                // 특정 연도 + 브랜드 전체: 브랜드별 판매량 차트
+                const brandStats = {};
+                carData.data.forEach(item => {
+                    if (item.year == yearFilter) {
+                        const carBrand = getBrandFromCarName(item.car_name);
+                        if (!brandStats[carBrand]) {
+                            brandStats[carBrand] = 0;
+                        }
+                        brandStats[carBrand] += item.sales_count;
+                    }
+                });
+                
+                chartData = Object.entries(brandStats)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10) // 상위 10개 브랜드만
+                    .map(([brand, totalSales]) => ({
+                        label: brand,
+                        value: totalSales
+                    }));
+                
+                chartType = 'bar';
+                chartTitle = `${yearFilter}년 브랜드별 판매량`;
+            } else if (brandFilter) {
+                // 특정 브랜드 선택: 해당 브랜드의 연도별 판매량
+                const brandYearlyStats = {};
+                carData.data.forEach(item => {
+                    const carBrand = getBrandFromCarName(item.car_name);
+                    if (carBrand === brandFilter) {
+                        const year = item.year;
+                        if (!brandYearlyStats[year]) {
+                            brandYearlyStats[year] = 0;
+                        }
+                        brandYearlyStats[year] += item.sales_count;
+                    }
+                });
+                
+                chartData = Object.entries(brandYearlyStats)
+                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .map(([year, totalSales]) => ({
+                        label: year + '년',
+                        value: totalSales
+                    }));
+                
+                chartType = 'line';
+                chartTitle = `${brandFilter} 브랜드 연도별 총 판매량`;
+            } else {
+                // 기본: 전체 브랜드의 연도별 판매량
+                const allYearlyStats = {};
+                carData.data.forEach(item => {
+                    const year = item.year;
+                    if (!allYearlyStats[year]) {
+                        allYearlyStats[year] = 0;
+                    }
+                    allYearlyStats[year] += item.sales_count;
+                });
+                
+                chartData = Object.entries(allYearlyStats)
+                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .map(([year, totalSales]) => ({
+                        label: year + '년',
+                        value: totalSales
+                    }));
+                
+                chartType = 'line';
+                chartTitle = '전체 브랜드 연도별 총 판매량';
+            }
+            
+            // 차트 제목 업데이트
+            document.querySelector('.chart-card:nth-child(1) .chart-title').textContent = chartTitle;
+            
+            // 차트 생성
+            const chartConfig = {
+                type: chartType,
+                data: {
+                    labels: chartData.map(item => item.label),
+                    datasets: [{
+                        label: chartType === 'bar' ? '판매량' : '총 판매량',
+                        data: chartData.map(item => item.value),
+                        borderColor: chartType === 'bar' ? '#e74c3c' : '#3498db',
+                        backgroundColor: chartType === 'bar' ? 'rgba(231, 76, 60, 0.8)' : 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: chartType === 'bar' ? 1 : 2,
+                        tension: chartType === 'line' ? 0.4 : 0,
+                        fill: chartType === 'line'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            };
+            
+            yearlyChart = new Chart(ctx, chartConfig);
+        }
+
+        // 브랜드별 차트 - 월별 판매량 트렌드로 변경
+        function updateBrandChart() {
+            const ctx = document.getElementById('brandChart').getContext('2d');
+            
+            if (brandChart) {
+                brandChart.destroy();
+            }
+            
+            const yearFilter = document.getElementById('yearFilter').value;
+            const brandFilter = document.getElementById('brandFilter').value;
+            
+            // 차트 데이터 계산
+            let chartData = [];
+            let chartTitle = '';
+            
+            if (yearFilter && brandFilter) {
+                // 특정 연도 + 특정 브랜드: 해당 브랜드의 월별 판매량
+                const monthlyStats = {};
+                carData.data.forEach(item => {
+                    if (item.year == yearFilter && getBrandFromCarName(item.car_name) === brandFilter) {
+                        const month = item.month;
+                        if (!monthlyStats[month]) {
+                            monthlyStats[month] = 0;
+                        }
+                        monthlyStats[month] += item.sales_count;
+                    }
+                });
+                
+                chartData = Object.entries(monthlyStats)
+                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .map(([month, totalSales]) => ({
+                        label: month + '월',
+                        value: totalSales
+                    }));
+                
+                chartTitle = `${yearFilter}년 ${brandFilter} 월별 판매량`;
+            } else if (yearFilter) {
+                // 특정 연도: 전체 브랜드의 월별 판매량
+                const monthlyStats = {};
+                carData.data.forEach(item => {
+                    if (item.year == yearFilter) {
+                        const month = item.month;
+                        if (!monthlyStats[month]) {
+                            monthlyStats[month] = 0;
+                        }
+                        monthlyStats[month] += item.sales_count;
+                    }
+                });
+                
+                chartData = Object.entries(monthlyStats)
+                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .map(([month, totalSales]) => ({
+                        label: month + '월',
+                        value: totalSales
+                    }));
+                
+                chartTitle = `${yearFilter}년 전체 브랜드 월별 판매량`;
+            } else {
+                // 기본: 최근 12개월 판매량 트렌드
+                const recentStats = {};
+                const currentYear = new Date().getFullYear();
+                const currentMonth = new Date().getMonth() + 1;
+                
+                carData.data.forEach(item => {
+                    const itemDate = new Date(item.year, item.month - 1);
+                    const currentDate = new Date(currentYear, currentMonth - 1);
+                    const monthsDiff = (currentDate.getFullYear() - itemDate.getFullYear()) * 12 + 
+                                     (currentDate.getMonth() - itemDate.getMonth());
+                    
+                    if (monthsDiff >= 0 && monthsDiff < 12) {
+                        const key = `${item.year}-${item.month.toString().padStart(2, '0')}`;
+                        if (!recentStats[key]) {
+                            recentStats[key] = 0;
+                        }
+                        recentStats[key] += item.sales_count;
+                    }
+                });
+                
+                chartData = Object.entries(recentStats)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([key, totalSales]) => {
+                        const [year, month] = key.split('-');
+                        return {
+                            label: `${year}년 ${parseInt(month)}월`,
+                            value: totalSales
+                        };
+                    });
+                
+                chartTitle = '최근 12개월 판매량 트렌드';
+            }
+            
+            // 차트 제목 업데이트
+            document.querySelector('.chart-card:nth-child(2) .chart-title').textContent = chartTitle;
+            
+            brandChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(item => item.label),
+                    datasets: [{
+                        label: '판매량',
+                        data: chartData.map(item => item.value),
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#2ecc71',
+                        pointBorderColor: '#27ae60',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 테이블 업데이트
+        function updateTable() {
+            const tbody = document.getElementById('tableBody');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">데이터가 없습니다.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredData
+                .slice(0, 50) // 최대 50개만 표시
+                .map(item => {
+                    const rankClass = item.rank_position <= 3 ? `rank-${item.rank_position}` : '';
+                    return `
+                        <tr class="${rankClass}">
+                            <td>${item.rank_position}</td>
+                            <td>${item.car_name}</td>
+                            <td>${item.sales_count.toLocaleString()}대</td>
+                            <td>${item.category || '-'}</td>
+                            <td>${item.year}년</td>
+                            <td>${item.month}월</td>
+                        </tr>
+                    `;
+                })
+                .join('');
+        }
+
+        // 필터링 함수
+        function filterData() {
+            if (!carData) return;
+            
+            const yearFilter = document.getElementById('yearFilter').value;
+            const brandFilter = document.getElementById('brandFilter').value;
+            
+            // 검색 조건 확인
+            let searchCondition = null;
+            const modelFilter = document.getElementById('modelFilter');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (modelFilter) {
+                searchCondition = modelFilter.value;
+            } else if (searchInput) {
+                searchCondition = searchInput.value.toLowerCase();
+            }
+            
+            filteredData = carData.data.filter(item => {
+                // 연도 필터
+                if (yearFilter && item.year != yearFilter) return false;
+                
+                // 브랜드 필터
+                if (brandFilter) {
+                    const carBrand = getBrandFromCarName(item.car_name);
+                    if (carBrand !== brandFilter) return false;
+                }
+                
+                // 검색/모델 필터
+                if (searchCondition) {
+                    if (modelFilter) {
+                        // 모델 선택 드롭다운인 경우
+                        if (item.car_name !== searchCondition) return false;
+                    } else {
+                        // 텍스트 검색인 경우
+                        if (!item.car_name.toLowerCase().includes(searchCondition)) return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            // 필터링 후 모든 업데이트 실행
+            updateStats();
+            updateCharts();
+            updateTable();
+        }
+
+        // 차량명에서 브랜드 추출
+        function getBrandFromCarName(carName) {
+            const brands = ['현대', '기아', '제네시스', '쌍용', '테슬라', 'BMW', '벤츠', '아우디', 
+                           '폭스바겐', '볼보', '렉서스', '토요타', '혼다', '닛산', '마쓰다', '스바루',
+                           '미니', '랜드로버', '재규어', '포드', '쉐보레', '캐딜락', '링컨', '닷지',
+                           '지프', '람보르기니', '페라리', '포르쉐', '마세라티', '알파로메오', '피아트',
+                        '르노코리아'];
+            
+            for (const brand of brands) {
+                if (carName.includes(brand)) {
+                    return brand;
+                }
+            }
+            return '기타';
+        }
+
+        // 이벤트 리스너
+        document.getElementById('yearFilter').addEventListener('change', function() {
+            updateSearchContainer();
+            filterData();
+        });
+        document.getElementById('brandFilter').addEventListener('change', function() {
+            updateSearchContainer();
+            filterData();
+        });
+        
+        // 초기 검색 입력 이벤트 리스너
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterData);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 MBTI 성격유형 검사</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #fff;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .form-container {
+            padding: 40px 30px;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .question-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .option {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .option label {
+            display: block;
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #495057;
+        }
+
+        .option label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option input[type="radio"]:checked + label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .info-section {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .info-section h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .info-section p {
+            color: #424242;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .form-container {
+                padding: 20px 15px;
+            }
+            
+            .options {
+                flex-direction: column;
+            }
+            
+            .option {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 MBTI 성격유형 검사</h1>
+            <p>당신의 성격유형을 알아보세요!</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="info-section">
+                <h3>📋 검사 안내</h3>
+                <p>아래 질문들에 대해 솔직하게 답변해주세요. 정답은 없으며, 본인의 성향에 가장 가까운 답을 선택하시면 됩니다.</p>
+            </div>
+
+            <form method="POST" id="mbtiForm">
+                {% for idx, question in enumerate(questions) %}
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">{{ idx + 1 }}</span>
+                        <span class="question-text">{{ question.question }}</span>
+                    </div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q{{ idx }}" value="agree" id="agree{{ idx }}" required>
+                            <label for="agree{{ idx }}">✅ 동의합니다</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q{{ idx }}" value="disagree" id="disagree{{ idx }}" required>
+                            <label for="disagree{{ idx }}">❌ 비동의합니다</label>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                        🔍 검사 결과 보기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 진행률 표시 및 제출 버튼 활성화
+        const form = document.getElementById('mbtiForm');
+        const progressBar = document.getElementById('progress');
+        const submitBtn = document.getElementById('submitBtn');
+        const totalQuestions = {{ questions|length }};
+        
+        function updateProgress() {
+            const answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            progressBar.style.width = progress + '%';
+            
+            // 모든 질문에 답변했을 때만 제출 버튼 활성화
+            if (answeredQuestions === totalQuestions) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🎉 검사 완료! 결과 보기';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.textContent = `🔍 검사 결과 보기 (${answeredQuestions}/${totalQuestions})`;
+            }
+        }
+        
+        // 라디오 버튼 변경 이벤트 리스너
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', updateProgress);
+        });
+        
+        // 폼 제출 시 로딩 표시
+        form.addEventListener('submit', function() {
+            submitBtn.textContent = '⏳ 결과 계산 중...';
+            submitBtn.disabled = true;
+        });
+        
+        // 초기 진행률 설정
+        updateProgress();
+    </script>
+</body>
+</html> 
